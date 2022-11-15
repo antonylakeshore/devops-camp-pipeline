@@ -4,7 +4,7 @@ pipeline {
     }
     //TODO("Lab 4 - Artifact Management"): add environment variables
     stages {
-        stage('Application repository') {
+        stage('Application Repository') {
             steps {
                 echo "Cloning application repository"
                 //TODO("Lab 3 - Introduction to Automated Builds"): add github url
