@@ -9,6 +9,7 @@ pipeline {
         DB_IMAGE_NAME = 'db'
     }
     stages {
+        //TODO: add stages to pipeline
         stage('Application repository') {
             steps {
                 echo "Cloning application repository"
@@ -35,24 +36,16 @@ pipeline {
                       echo "Building database image"
                       withCredentials([usernameColonPassword(credentialsId: 'ajoseph-harbor-auth', variable: 'HARBOR-AUTH')]) {
                           script {
-                              sh 'docker build -t $DB_IMAGE_NAME-$COMMIT_HASH -f ./db/Dockerfile ./afs-labs-student'
+                              docker.build('$DB_IMAGE_NAME-$COMMIT_HASH', '-f ./db/Dockerfile ./afs-labs-student')
                               docker.withRegistry('https://$HARBOR_REGISTRY', 'ajoseph-harbor-auth') {
                                   sh 'docker tag $DB_IMAGE_NAME-$COMMIT_HASH $HARBOR_REGISTRY/$HARBOR_PROJECT/$DB_IMAGE_NAME:$COMMIT_HASH-$PIPELINE_HASH'
                                   sh 'docker push $HARBOR_REGISTRY/$HARBOR_PROJECT/$DB_IMAGE_NAME:$COMMIT_HASH-$PIPELINE_HASH'
                               }
                           }
-                          stage('Security scanning') {
-            steps {
-                  withCredentials([usernamePassword(credentialsId: 'ajoseph-harbor-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                      echo "Scanning $DB_IMAGE_NAME image"
-                      sh 'python harbor_scanner.py -i $DB_IMAGE_NAME -r $HARBOR_REGISTRY -p $HARBOR_PROJECT -c ${USERNAME}:${PASSWORD}'
-                  }
-            }
-        }
                       }
                   }
                   post {
-                      always {
+                    always {
                           echo "Clean local $DB_IMAGE_NAME image"
                           script {
                               try {
@@ -63,7 +56,15 @@ pipeline {
                               }
                           }
                       }
+                }
+                stage('Security scanning') {
+                  steps {
+                       withCredentials([usernamePassword(credentialsId: 'ajoseph-harbor-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                            echo "Scanning $DB_IMAGE_NAME image"
+                            sh 'python harbor_scanner.py -i $DB_IMAGE_NAME -r $HARBOR_REGISTRY -p $HARBOR_PROJECT -c ${USERNAME}:${PASSWORD}'
+                       }
                   }
+                }
               }
               stage('Deploy') {
                   steps {
