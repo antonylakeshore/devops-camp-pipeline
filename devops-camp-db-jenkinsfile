@@ -31,7 +31,7 @@ pipeline {
               environment name: 'BUILD_DB', value: 'true'
            }
            stages {
-              steps('Database docker build') {
+              stage('Database docker build') {
                   steps {
                       echo "Building database image"
                       withCredentials([usernameColonPassword(credentialsId: 'ajoseph-harbor-auth', variable: 'HARBOR-AUTH')]) {
