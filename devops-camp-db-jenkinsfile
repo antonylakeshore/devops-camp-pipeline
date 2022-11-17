@@ -58,6 +58,8 @@ pipeline {
                       }
                     }
                 }
+           }
+        }
                 stage('Security scanning') {
                   steps {
                        withCredentials([usernamePassword(credentialsId: 'ajoseph-harbor-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -65,17 +67,16 @@ pipeline {
                             sh 'python harbor_scanner.py -i $DB_IMAGE_NAME -r $HARBOR_REGISTRY -p $HARBOR_PROJECT -c ${USERNAME}:${PASSWORD}'
                        }
                   }
-                }
-              }
+            }
+            
               stage('Deploy') {
                   steps {
                       echo "Deployment stage"
                       sh 'kubectl -n ajoseph set image deployment/db-deployment db-deployment=$HARBOR_REGISTRY/$HARBOR_PROJECT/$DB_IMAGE_NAME:$COMMIT_HASH-$PIPELINE_HASH'
                   }
               }
-           }
         }
-    
+        
     post {
         cleanup {
             echo "Clean workspace"
