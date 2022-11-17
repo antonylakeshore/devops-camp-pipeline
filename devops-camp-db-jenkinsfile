@@ -56,6 +56,7 @@ pipeline {
                               }
                           }
                       }
+                    }
                 }
                 stage('Security scanning') {
                   steps {
@@ -74,7 +75,7 @@ pipeline {
               }
            }
         }
-    }
+    
     post {
         cleanup {
             echo "Clean workspace"
